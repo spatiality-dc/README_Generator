@@ -5,6 +5,13 @@ const util = require("util");
 
 const writeFileAsync = util.promisify(fs.writeFile);
 
+// async function queryGitHub(username) {
+//   const queryUrl = `https://api.github.com/users/${username}`;
+//   this.response;
+//   const gitHubResponse = await axios.get(queryUrl);
+//   return gitHubResponse;
+// }
+
 function promptUser() {
   return inquirer.prompt([
     {
@@ -38,9 +45,10 @@ function promptUser() {
       message: "Please enter any comments about usage of this project.",
     },
     {
-      type: "input",
+      type: "checkbox",
       name: "license",
       message: "Which license would you like to use for this project?",
+      choices: ["ISC", "MIT", "Creative Commons"],
     },
     {
       type: "input",
@@ -65,8 +73,8 @@ function generateMD(answers) {
   return `# ${answers.title}
 
   This project was created by ${answers.username}. You can contact them at ${answers.email}.
-
-  ![User Avatar](/images/avatar.png)
+  <br>
+  ![Profile Picture]( ${answers.profileImageURL} "Profile Pic")
   
   ## Description
   
@@ -108,9 +116,13 @@ function generateMD(answers) {
 }
 
 async function init() {
+  // let gitHubData = await queryGitHub(answers.username);
+  // answers.profileImageURL = gitHubData.data.avatar_url;
+
   console.log(
     "Hi there. Please answer the following questions and we'll build your README for you."
   );
+
   try {
     const answers = await promptUser();
 
@@ -125,3 +137,14 @@ async function init() {
 }
 
 init();
+
+// Questions for Petra:
+
+// My await command with gitHubData is throwing an error. Says I have not define "answers"
+// This means I cant pull the user avatar
+
+// Can I make if statements on my prompt questions?
+
+// For example, if a user chooses a license from the checkbox, that check box delivers not only Text, but a license "badge" that is added into the markdown?
+
+// https://gist.github.com/lukas-h/2a5d00690736b4c3a7ba
