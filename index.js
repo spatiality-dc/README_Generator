@@ -5,13 +5,6 @@ const util = require("util");
 
 const writeFileAsync = util.promisify(fs.writeFile);
 
-// async function queryGitHub(username) {
-//   const queryUrl = `https://api.github.com/users/${username}`;
-//   this.response;
-//   const gitHubResponse = await axios.get(queryUrl);
-//   return gitHubResponse;
-// }
-
 function promptUser() {
   return inquirer.prompt([
     {
@@ -69,12 +62,23 @@ function promptUser() {
   ]);
 }
 
+function getLicenseBadge(licenseString) {
+  if (licenseString === "ISC") {
+    return "[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)";
+  } else if (licenseString === "MIT") {
+    return "[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)";
+  }
+  return "[![License: CC0-1.0](https://licensebuttons.net/l/zero/1.0/80x15.png)](http://creativecommons.org/publicdomain/zero/1.0/)";
+}
+
 function generateMD(answers) {
   return `# ${answers.title}
 
-  This project was created by ${answers.username}. You can contact them at ${answers.email}.
+  This project was created by ${answers.username}. You can contact them at ${
+    answers.email
+  }.
   <br>
-  ![Profile Picture]( ${answers.profileImageURL} "Profile Pic")
+  ![Profile Picture]( ${answers.avatarURL}&s=100)
   
   ## Description
   
@@ -100,7 +104,7 @@ function generateMD(answers) {
   
   ## License
   
-  ${answers.license}
+  ${answers.license} ${getLicenseBadge(answers.license)}
   
   ## Contributing
   
@@ -116,8 +120,8 @@ function generateMD(answers) {
 }
 
 async function init() {
-  // let gitHubData = await queryGitHub(answers.username);
-  // answers.profileImageURL = gitHubData.data.avatar_url;
+  // let gitResponse = await queryGitHub(answers.username);
+  // answers.avatarURL = gitResponse.data[0].avatar_url;
 
   console.log(
     "Hi there. Please answer the following questions and we'll build your README for you."
@@ -125,26 +129,18 @@ async function init() {
 
   try {
     const answers = await promptUser();
+    const queryUrl = `https://api.github.com/users/${answers.username}/repos?per_page=100`;
 
-    const html = generateMD(answers);
-
-    await writeFileAsync("README_mockup.md", html);
-
-    console.log("Successfully wrote to README_mockup.md file");
+    axios.get(queryUrl).then(function (res) {
+      const avatarURL = res.data[0].owner.avatar_url;
+      // answers.avatarURL = res.data[0].owner.avatar_url;
+      const html = generateMD({ ...answers, avatarURL });
+      writeFileAsync("README_mockup.md", html);
+      console.log("Successfully wrote to README_mockup.md file");
+    });
   } catch (err) {
     console.log(err);
   }
 }
 
 init();
-
-// Questions for Petra:
-
-// My await command with gitHubData is throwing an error. Says I have not define "answers"
-// This means I cant pull the user avatar
-
-// Can I make if statements on my prompt questions?
-
-// For example, if a user chooses a license from the checkbox, that check box delivers not only Text, but a license "badge" that is added into the markdown?
-
-// https://gist.github.com/lukas-h/2a5d00690736b4c3a7ba

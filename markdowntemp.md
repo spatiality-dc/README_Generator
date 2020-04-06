@@ -1,6 +1,6 @@
 # \${answers.title}
 
-![Author Avatar](${userAvatar}&s=100)
+![Author Avatar](${avatarURL}&s=100)
 ${userEmail}
 ${badge}
 
