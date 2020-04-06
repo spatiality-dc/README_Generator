@@ -14,11 +14,6 @@ function promptUser() {
     },
     {
       type: "input",
-      name: "email",
-      message: "Please enter your email address.",
-    },
-    {
-      type: "input",
       name: "title",
       message: "Please enter a project title.",
     },
@@ -63,20 +58,21 @@ function promptUser() {
 }
 
 function getLicenseBadge(licenseString) {
-  if (licenseString === "ISC") {
+  if (licenseString == "ISC") {
     return "[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)";
-  } else if (licenseString === "MIT") {
+  } else if (licenseString == "MIT") {
     return "[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)";
+  } else {
+    ("[![License: CC0-1.0](https://licensebuttons.net/l/zero/1.0/80x15.png)](http://creativecommons.org/publicdomain/zero/1.0/)");
   }
-  return "[![License: CC0-1.0](https://licensebuttons.net/l/zero/1.0/80x15.png)](http://creativecommons.org/publicdomain/zero/1.0/)";
 }
 
 function generateMD(answers) {
   return `# ${answers.title}
 
-  This project was created by ${answers.username}. You can contact them at ${
-    answers.email
-  }.
+  This project was created by ${answers.username}.
+  <br>
+  You can contact them at ${answers.userEmail}.
   <br>
   ![Profile Picture]( ${answers.avatarURL}&s=100)
   
@@ -104,7 +100,9 @@ function generateMD(answers) {
   
   ## License
   
-  ${answers.license} ${getLicenseBadge(answers.license)}
+  ${answers.license}
+  <br>
+  ${getLicenseBadge(answers.license)}
   
   ## Contributing
   
@@ -120,22 +118,19 @@ function generateMD(answers) {
 }
 
 async function init() {
-  // let gitResponse = await queryGitHub(answers.username);
-  // answers.avatarURL = gitResponse.data[0].avatar_url;
-
   console.log(
     "Hi there. Please answer the following questions and we'll build your README for you."
   );
 
   try {
     const answers = await promptUser();
-    const queryUrl = `https://api.github.com/users/${answers.username}/repos?per_page=100`;
+    const queryUrl = `https://api.github.com/users/${answers.username}`;
 
     axios.get(queryUrl).then(function (res) {
-      const avatarURL = res.data[0].owner.avatar_url;
-      // answers.avatarURL = res.data[0].owner.avatar_url;
-      const html = generateMD({ ...answers, avatarURL });
-      writeFileAsync("README_mockup.md", html);
+      const avatarURL = res.data.avatar_url;
+      const userEmail = res.data.email;
+      const markdown = generateMD({ ...answers, avatarURL, userEmail });
+      writeFileAsync("README_mockup.md", markdown);
       console.log("Successfully wrote to README_mockup.md file");
     });
   } catch (err) {
