@@ -26,7 +26,7 @@ As expected with this course, there were a number of challenges with this exerci
 
 Upon completion of the task, my command line application can be seen in the gif below.
 
-![homework finished](./assets/img/homework_completed.png)
+![homework finished](./assets/homework_completed.gif)
 
 ## Results
 
